@@ -1,13 +1,17 @@
 import type { Route } from "./+types/home";
-import { Welcome } from "../welcome/welcome";
+import { FloorPlanModel } from "~/lib/FloorPlanModel";
 
 export function meta({}: Route.MetaArgs) {
   return [
-    { title: "New React Router App" },
-    { name: "description", content: "Welcome to React Router!" },
+    { title: "Room Planner" },
+    { name: "description", content: "Welcome to Room Planner" },
   ];
 }
 
 export default function Home() {
-  return <Welcome />;
+  return <FloorPlanModel />;
 }
+
+// export function Example1() {
+//   return <FloorPlanModel />;
+// }
