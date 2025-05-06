@@ -20,25 +20,6 @@ const WALL_HEIGHT_MM = 2500;
 const ROOM_FLOOR_THICKNESS_MM = 20; // A small thickness for the floor, can be 0 for a plane
 const DOOR_COLOR = "#654321"; // Dark brown for doors
 
-// Sample Data (from README - First Example)
-// const exampleRoomPlanStr = `{
-//     DiningKitchen(109): BBox(xs=5, ys=5, xe=10, ye=13),
-//     Hall(110): BBox(xs=3, ys=0, xe=10, ye=5),
-//     Bedroom(111): BBox(xs=10, ys=3, xe=15, ye=10),
-//     Shower(112): BBox(xs=10, ys=0, xe=15, ye=3),
-//     Living(113): BBox(xs=0, ys=5, xe=5, ye=13),
-//     Entryway(114): BBox(xs=0, ys=0, xe=3, ye=5)
-// }`;
-
-// const exampleGraphStr = `[
-//     Edge(i=Entryway(114), j=Hall(110), separation='door'),
-//     Edge(i=Hall(110), j=Living(113), separation='void'),
-//     Edge(i=Living(113), j=DiningKitchen(109), separation='void'),
-//     Edge(i=Hall(110), j=Bedroom(111), separation='door'),
-//     Edge(i=Hall(110), j=Shower(112), separation='door'),
-//     Edge(i=Shower(112), j=Bedroom(111), separation='wall')
-// ]`;
-
 const examples = [
   {
     label: "Example 1",
@@ -62,28 +43,28 @@ const examples = [
   {
     label: "Example 2",
     plan: `{
-   DiningKitchen(110): BBox(xs=0, ys=6, xe=6, ye=15),
+    DiningKitchen(110): BBox(xs=0, ys=6, xe=6, ye=15),
     Bedroom(111): BBox(xs=9, ys=8, xe=14, ye=13),
     Entryway(112): BBox(xs=9, ys=5, xe=14, ye=8),
     Shower(113): BBox(xs=6, ys=10, xe=9, ye=15),
     CorridorV(114): BBox(xs=6, ys=6, xe=9, ye=10),
     Dressing(115): BBox(xs=9, ys=13, xe=14, ye=15),
     Living(116): BBox(xs=0, ys=0, xe=9, ye=6)
-  }`,
+}`,
     graph: `[
-   Edge(i=Entryway(112), j=CorridorV(114), separation='door'),
+    Edge(i=Entryway(112), j=CorridorV(114), separation='door'),
     Edge(i=CorridorV(114), j=Living(116), separation='void'),
     Edge(i=Living(116), j=DiningKitchen(110), separation='void'),
     Edge(i=CorridorV(114), j=Bedroom(111), separation='door'),
     Edge(i=Bedroom(111), j=Dressing(115), separation='door'),
     Edge(i=CorridorV(114), j=Shower(113), separation='door'),
     Edge(i=Shower(113), j=Bedroom(111), separation='wall'),
-  ]`,
+]`,
   },
   {
     label: "Example 3",
-    plan: `
-        Bedroom(1742): BBox(xs=5, ys=9, xe=14, ye=16),
+    plan: `{
+    Bedroom(1742): BBox(xs=5, ys=9, xe=14, ye=16),
     Hall(1743): BBox(xs=5, ys=0, xe=14, ye=9),
     Living(1744): BBox(xs=5, ys=-10, xe=12, ye=0),
     Entryway(1745): BBox(xs=0, ys=0, xe=5, ye=6),
@@ -95,9 +76,9 @@ const examples = [
     Dressing(1751): BBox(xs=19, ys=-10, xe=26, ye=-4),
     Bedroom(1752): BBox(xs=19, ys=-4, xe=26, ye=6),
     Shower(1753): BBox(xs=14, ys=11, xe=19, ye=16)
-    `,
-    graph: `
-        Edge(i=Entryway(1745), j=Hall(1743), separation='door'),
+}`,
+    graph: `[
+    Edge(i=Entryway(1745), j=Hall(1743), separation='door'),
     Edge(i=CorridorV(1750), j=Hall(1743), separation='void'),
     Edge(i=CorridorV(1750), j=Bedroom(1742), separation='door'),
     Edge(i=CorridorV(1750), j=Bedroom(1752), separation='door'),
@@ -108,7 +89,7 @@ const examples = [
     Edge(i=Living(1744), j=DiningKitchen(1749), separation='void'),
     Edge(i=CorridorV(1750), j=Shower(1753), separation='door'),
     Edge(i=Hall(1743), j=WC(1748), separation='door')
-    `,
+]`,
   },
 ];
 
@@ -382,31 +363,103 @@ function Aside({
   example: (typeof examples)[number];
   setExample: (example: (typeof examples)[number]) => void;
 }) {
+  const [plan, setPlan] = React.useState(example.plan);
+  const [graph, setGraph] = React.useState(example.graph);
+  const [planError, setPlanError] = React.useState(false);
+  const [graphError, setGraphError] = React.useState(false);
+
+  React.useEffect(() => {
+    setPlan(example.plan);
+    setGraph(example.graph);
+    setPlanError(false); // Reset errors when example changes
+    setGraphError(false);
+  }, [example]);
+
+  const handleRender = () => {
+    let currentPlanError = false;
+    let currentGraphError = false;
+
+    try {
+      parseRoomPlan(plan); // Validate plan
+      setPlanError(false);
+    } catch (e) {
+      console.error("Plan validation error:", e);
+      setPlanError(true);
+      currentPlanError = true;
+    }
+
+    try {
+      parseGraph(graph); // Validate graph
+      setGraphError(false);
+    } catch (e) {
+      console.error("Graph validation error:", e);
+      setGraphError(true);
+      currentGraphError = true;
+    }
+
+    if (!currentPlanError && !currentGraphError) {
+      setExample({ label: example.label, plan, graph });
+    }
+  };
+
   return (
-    <div className="w-64 bg-gray-100 p-4">
-      <div className="flex flex-col gap-2">
+    <div className="w-lg bg-gray-100 p-4">
+      <div className="flex gap-2 justify-between w-full">
+        <button
+          className="bg-gray-900 text-white p-2 rounded-md w-full text-sm h-10"
+          onClick={() => setExample(examples[0])}
+        >
+          Example 1
+        </button>
+        <button
+          className="bg-gray-900 text-white p-2 rounded-md w-full text-sm  h-10"
+          onClick={() => setExample(examples[1])}
+        >
+          Example 2
+        </button>
+        <button
+          className="bg-gray-900 text-white p-2 rounded-md w-full text-sm  h-10"
+          onClick={() => setExample(examples[2])}
+        >
+          Example 3
+        </button>
+      </div>
+      <div className="flex flex-col gap-2 mt-4" key={JSON.stringify(example)}>
+        <p className="text-sm font-bold">Layout Editor</p>
+        <p className="text-sm font-bold">Plan</p>
         <div>
-          <button
-            className="bg-gray-900 text-white p-2 rounded-md w-full text-sm h-10"
-            onClick={() => setExample(examples[0])}
-          >
-            Example 1
-          </button>
+          <textarea
+            rows={12}
+            className={`w-full bg-gray-200 text-sm ${
+              planError ? "border-red-500 border-2" : "border-gray-300"
+            }`}
+            value={plan}
+            onChange={(e) => {
+              setPlan(e.target.value);
+              if (planError) setPlanError(false);
+            }}
+          />
+        </div>
+        <p className="text-sm font-bold">Graph</p>
+        <div>
+          <textarea
+            rows={12}
+            className={`w-full bg-gray-200 text-sm ${
+              graphError ? "border-red-500 border-2" : "border-gray-300"
+            }`}
+            value={graph}
+            onChange={(e) => {
+              setGraph(e.target.value);
+              if (graphError) setGraphError(false);
+            }}
+          />
         </div>
         <div>
           <button
-            className="bg-gray-900 text-white p-2 rounded-md w-full text-sm  h-10"
-            onClick={() => setExample(examples[1])}
+            className="bg-gray-900 text-white p-2 rounded-md text-sm h-10 px-6"
+            onClick={handleRender}
           >
-            Example 2
-          </button>
-        </div>
-        <div>
-          <button
-            className="bg-gray-900 text-white p-2 rounded-md w-full text-sm  h-10"
-            onClick={() => setExample(examples[2])}
-          >
-            Example 3
+            Render
           </button>
         </div>
       </div>
