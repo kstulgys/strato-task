@@ -403,7 +403,7 @@ function Aside({
   };
 
   return (
-    <div className="w-lg bg-gray-100 p-4">
+    <div className="min-w-md bg-gray-50 p-4 h-full">
       <div className="flex gap-2 justify-between w-full">
         <button
           className="bg-gray-900 text-white p-2 rounded-md w-full text-sm h-10"
@@ -430,8 +430,8 @@ function Aside({
         <div>
           <textarea
             rows={12}
-            className={`w-full bg-gray-200 text-sm ${
-              planError ? "border-red-500 border-2" : "border-gray-300"
+            className={`w-full bg-gray-200 text-sm rounded-md ${
+              planError ? "border-red-500 border-2" : "border-gray-300 border-2"
             }`}
             value={plan}
             onChange={(e) => {
@@ -444,8 +444,10 @@ function Aside({
         <div>
           <textarea
             rows={12}
-            className={`w-full bg-gray-200 text-sm ${
-              graphError ? "border-red-500 border-2" : "border-gray-300"
+            className={`w-full bg-gray-200 text-sm rounded-md ${
+              graphError
+                ? "border-red-500 border-2"
+                : "border-gray-300 border-2"
             }`}
             value={graph}
             onChange={(e) => {
@@ -472,8 +474,10 @@ export function FloorPlanModel() {
 
   return (
     <div className="flex bg-white text-black">
-      <Aside example={example} setExample={setExample} />
-      <div className="flex-1 min-h-screen">
+      <div className="flex-1">
+        <Aside example={example} setExample={setExample} />
+      </div>
+      <div className="flex-3 min-h-screen">
         <FloorPlanViewer example={example} />
       </div>
     </div>
