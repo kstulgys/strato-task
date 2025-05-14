@@ -139,7 +139,7 @@ function Aside() {
   return (
     <div className="h-full p-6 min-w-md max-w-md">
       <div>
-        <button onClick={restartThread}>Restart</button>
+        <button onClick={restartThread}>Restart thread</button>
       </div>
       <div className="bg-gray-300 rounded-xl p-3">
         <div className="h-full">
@@ -180,13 +180,7 @@ function Aside() {
             })}
           </div>
         </div>
-        {isLoading ? (
-          <p>Thinking...</p>
-        ) : (
-          <button onClick={toggleAudio} className="text-sm">
-            Toggle audio
-          </button>
-        )}
+        {isLoading && <p>Thinking...</p>}
         <form
           className="w-full"
           onSubmit={async (e) => {
@@ -245,7 +239,7 @@ function Aside() {
           </div>
         </form>
       </div>
-      {isAudioEnabled && <audio ref={audioRef} />}
+      {/* {isAudioEnabled && <audio ref={audioRef} />} */}
     </div>
   );
 }
