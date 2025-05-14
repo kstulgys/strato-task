@@ -29,7 +29,7 @@ export default function Chat() {
 function Aside() {
   const { ENV } = useLoaderData<typeof loader>();
 
-  const [isAudioEnabled, setIsAudioEnabled] = React.useState(false);
+  // const [isAudioEnabled, setIsAudioEnabled] = React.useState(false);
 
   const audioRef = React.useRef<HTMLAudioElement>(null);
   // messages container ref
@@ -42,9 +42,9 @@ function Aside() {
   const createThread = useAction(api.agent.createThread);
 
   const continueThread = useAction(api.agent.continueThread);
-  const lastTts = useQuery(api.tts.byStoreyId, {
-    storeyId,
-  });
+  // const lastTts = useQuery(api.tts.byStoreyId, {
+  //   storeyId,
+  // });
 
   const createStorey = useMutation(api.storey.create);
 
@@ -55,23 +55,23 @@ function Aside() {
   const [message, setMessage] = React.useState("");
   const [isLoading, setIsLoading] = React.useState(false);
 
-  console.log({ messages });
+  // console.log({ messages });
 
-  React.useEffect(() => {
-    // get last message
-    const lastMessage = messages?.page[messages?.page.length - 1];
-    if (!lastMessage || !threadId || !storeyId) return;
-    if (lastMessage?.message?.role === "assistant") {
-      (async () => {
-        if (lastTts?.audioUrl && lastMessage.text === lastTts?.message) {
-          if (audioRef.current) {
-            audioRef.current.src = lastTts.audioUrl;
-            audioRef.current.play();
-          }
-        }
-      })();
-    }
-  }, [messages, threadId, storeyId, lastTts]);
+  // React.useEffect(() => {
+  //   // get last message
+  //   const lastMessage = messages?.page[messages?.page.length - 1];
+  //   if (!lastMessage || !threadId || !storeyId) return;
+  //   if (lastMessage?.message?.role === "assistant") {
+  //     (async () => {
+  //       if (lastTts?.audioUrl && lastMessage.text === lastTts?.message) {
+  //         if (audioRef.current) {
+  //           audioRef.current.src = lastTts.audioUrl;
+  //           audioRef.current.play();
+  //         }
+  //       }
+  //     })();
+  //   }
+  // }, [messages, threadId, storeyId, lastTts]);
 
   // const talk = () => {
   //   const lastMessage = messages?.page[messages?.page.length - 1];
@@ -88,28 +88,28 @@ function Aside() {
   //   }
   // };
 
-  const disableAudio = () => {
-    if (audioRef.current && !audioRef.current.paused) {
-      audioRef.current.pause();
-    }
-  };
+  // const disableAudio = () => {
+  //   if (audioRef.current && !audioRef.current.paused) {
+  //     audioRef.current.pause();
+  //   }
+  // };
 
-  const enableAudio = () => {
-    if (audioRef.current && audioRef.current.paused) {
-      audioRef.current.play();
-    }
-  };
+  // const enableAudio = () => {
+  //   if (audioRef.current && audioRef.current.paused) {
+  //     audioRef.current.play();
+  //   }
+  // };
 
-  const toggleAudio = () => {
-    if (audioRef.current) {
-      if (audioRef.current.paused) {
-        enableAudio();
-      } else {
-        disableAudio();
-      }
-    }
-    setIsAudioEnabled((prev) => !prev);
-  };
+  // const toggleAudio = () => {
+  //   if (audioRef.current) {
+  //     if (audioRef.current.paused) {
+  //       enableAudio();
+  //     } else {
+  //       disableAudio();
+  //     }
+  //   }
+  //   setIsAudioEnabled((prev) => !prev);
+  // };
 
   // smooth scroll to bottom of messages container
   React.useEffect(() => {
@@ -180,7 +180,7 @@ function Aside() {
             })}
           </div>
         </div>
-        {isLoading && <p>Thinking...</p>}
+        {isLoading && <p>thinking...</p>}
         <form
           className="w-full"
           onSubmit={async (e) => {

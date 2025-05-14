@@ -100,18 +100,11 @@ export const continueThread = action({
       },
     });
 
-    // if (result.text) {
-    //   await ctx.runAction(internal.tts.create, {
-    //     threadId,
-    //     text: result.text,
-    //   });
-    // }
-
-    await ctx.scheduler.runAfter(0, internal.tts.create, {
-      storeyId,
-      threadId,
-      text: result.text,
-    });
+    // await ctx.scheduler.runAfter(0, internal.tts.create, {
+    //   storeyId,
+    //   threadId,
+    //   text: result.text,
+    // });
 
     return result.text;
   },
