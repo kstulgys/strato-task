@@ -29,6 +29,8 @@ export default function Chat() {
 function Aside() {
   const { ENV } = useLoaderData<typeof loader>();
 
+  const [isAudioEnabled, setIsAudioEnabled] = React.useState(false);
+
   const audioRef = React.useRef<HTMLAudioElement>(null);
   // messages container ref
   const messagesContainerRef = React.useRef<HTMLDivElement>(null);
@@ -71,19 +73,42 @@ function Aside() {
     }
   }, [messages, threadId, storeyId, lastTts]);
 
-  const talk = () => {
-    const lastMessage = messages?.page[messages?.page.length - 1];
-    if (!lastMessage || !threadId) return;
-    if (lastMessage?.message?.role === "assistant") {
-      (async () => {
-        if (lastTts?.audioUrl && lastMessage.text === lastTts.message) {
-          if (audioRef.current) {
-            audioRef.current.src = lastTts.audioUrl;
-            audioRef.current.play();
-          }
-        }
-      })();
+  // const talk = () => {
+  //   const lastMessage = messages?.page[messages?.page.length - 1];
+  //   if (!lastMessage || !threadId) return;
+  //   if (lastMessage?.message?.role === "assistant") {
+  //     (async () => {
+  //       if (lastTts?.audioUrl && lastMessage.text === lastTts.message) {
+  //         if (audioRef.current) {
+  //           audioRef.current.src = lastTts.audioUrl;
+  //           audioRef.current.play();
+  //         }
+  //       }
+  //     })();
+  //   }
+  // };
+
+  const disableAudio = () => {
+    if (audioRef.current && !audioRef.current.paused) {
+      audioRef.current.pause();
     }
+  };
+
+  const enableAudio = () => {
+    if (audioRef.current && audioRef.current.paused) {
+      audioRef.current.play();
+    }
+  };
+
+  const toggleAudio = () => {
+    if (audioRef.current) {
+      if (audioRef.current.paused) {
+        enableAudio();
+      } else {
+        disableAudio();
+      }
+    }
+    setIsAudioEnabled((prev) => !prev);
   };
 
   // smooth scroll to bottom of messages container
@@ -158,8 +183,8 @@ function Aside() {
         {isLoading ? (
           <p>Thinking...</p>
         ) : (
-          <button onClick={talk} className="text-sm">
-            Enable audio
+          <button onClick={toggleAudio} className="text-sm">
+            Toggle audio
           </button>
         )}
         <form
@@ -220,7 +245,7 @@ function Aside() {
           </div>
         </form>
       </div>
-      <audio ref={audioRef} />
+      {isAudioEnabled && <audio ref={audioRef} />}
     </div>
   );
 }
