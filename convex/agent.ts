@@ -18,7 +18,7 @@ const supportAgent = new Agent(components.agent, {
   chat: openai.chat("gpt-4o-mini"),
   textEmbedding: openai.embedding("text-embedding-3-small"),
   instructions:
-    "You are an expert architect and residential floor plan designer/consultant. Your tone is a bit sarcastic but your answers should be very short and to the point. You must provide answers strictly based on your capabilities with existing tools.",
+    "You are an expert architect and residential floor plan designer/consultant. Your tone is a little bit sarcastic but your answers should be very short and to the point. You must provide answers strictly based on your capabilities with existing tools.",
   // Used for fetching context messages.
   contextOptions: {
     // Whether to include tool messages in the context.
@@ -96,6 +96,7 @@ export const continueThread = action({
         addExteriorWallsTool: addExteriorWallsTool(storeyId),
 
         addDoorsTool: addDoorsTool(storeyId),
+        updateSettingsTool: updateSettingsTool(storeyId),
       },
     });
 
@@ -105,6 +106,12 @@ export const continueThread = action({
     //     text: result.text,
     //   });
     // }
+
+    await ctx.scheduler.runAfter(0, internal.tts.create, {
+      storeyId,
+      threadId,
+      text: result.text,
+    });
 
     return result.text;
   },
@@ -121,6 +128,26 @@ export const getThreadMessages = query({
     });
   },
 });
+
+export const updateSettingsTool = (storeyId: Id<"storey">) => {
+  return createTool({
+    description: "Updates the settings for the floor plan.",
+    args: z.object({
+      view: z.optional(
+        z.union([z.literal("orthographic"), z.literal("perspective")])
+      ),
+      showRawData: z.optional(z.boolean()),
+    }),
+    handler: async (ctx, { view, showRawData }) => {
+      await ctx.runMutation(internal.settings.update, {
+        storeyId,
+        view,
+        showRawData,
+      });
+      return "Settings updated successfully";
+    },
+  });
+};
 
 export const removeSpacesTool = (storeyId: Id<"storey">) => {
   return createTool({

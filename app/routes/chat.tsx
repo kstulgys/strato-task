@@ -40,7 +40,9 @@ function Aside() {
   const createThread = useAction(api.agent.createThread);
 
   const continueThread = useAction(api.agent.continueThread);
-  const getTts = useMutation(api.tts.byThreadId);
+  const lastTts = useQuery(api.tts.byStoreyId, {
+    storeyId,
+  });
 
   const createStorey = useMutation(api.storey.create);
 
@@ -56,31 +58,27 @@ function Aside() {
   React.useEffect(() => {
     // get last message
     const lastMessage = messages?.page[messages?.page.length - 1];
-    if (!lastMessage || !threadId) return;
+    if (!lastMessage || !threadId || !storeyId) return;
     if (lastMessage?.message?.role === "assistant") {
       (async () => {
-        const tts = await getTts({ threadId: threadId! });
-        console.log({ tts });
-        if (tts?.audioUrl) {
+        if (lastTts?.audioUrl && lastMessage.text === lastTts?.message) {
           if (audioRef.current) {
-            audioRef.current.src = tts.audioUrl;
+            audioRef.current.src = lastTts.audioUrl;
             audioRef.current.play();
           }
         }
       })();
     }
-  }, [messages, threadId]);
+  }, [messages, threadId, storeyId, lastTts]);
 
   const talk = () => {
     const lastMessage = messages?.page[messages?.page.length - 1];
     if (!lastMessage || !threadId) return;
     if (lastMessage?.message?.role === "assistant") {
       (async () => {
-        const tts = await getTts({ threadId: threadId! });
-        console.log({ tts });
-        if (tts?.audioUrl) {
+        if (lastTts?.audioUrl && lastMessage.text === lastTts.message) {
           if (audioRef.current) {
-            audioRef.current.src = tts.audioUrl;
+            audioRef.current.src = lastTts.audioUrl;
             audioRef.current.play();
           }
         }

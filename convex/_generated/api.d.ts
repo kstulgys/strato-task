@@ -10,6 +10,7 @@
 
 import type * as agent from "../agent.js";
 import type * as doors from "../doors.js";
+import type * as settings from "../settings.js";
 import type * as spaces from "../spaces.js";
 import type * as storey from "../storey.js";
 import type * as tts from "../tts.js";
@@ -32,6 +33,7 @@ import type {
 declare const fullApi: ApiFromModules<{
   agent: typeof agent;
   doors: typeof doors;
+  settings: typeof settings;
   spaces: typeof spaces;
   storey: typeof storey;
   tts: typeof tts;

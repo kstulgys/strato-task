@@ -398,6 +398,10 @@ export function FloorPlanRenderer() {
     return map;
   }, [windows]);
 
+  const settings = useQuery(api.settings.get, {
+    storeyId,
+  });
+
   const handleWallSelect = (data: Wall) => {
     setSelectedWallInfo(data);
   };
@@ -405,7 +409,8 @@ export function FloorPlanRenderer() {
   return (
     <>
       <Canvas
-        orthographic
+        key={settings?.view}
+        orthographic={settings?.view === "orthographic"}
         camera={{
           position: [15, 20, 25],
           fov: 50,

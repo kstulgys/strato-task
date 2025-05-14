@@ -18,6 +18,13 @@ export const create = mutation({
       height: 3,
     });
 
+    // create settings
+    await ctx.db.insert("settings", {
+      storeyId,
+      view: "perspective",
+      showRawData: false,
+    });
+
     return { storeyId };
   },
 });

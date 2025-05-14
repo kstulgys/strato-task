@@ -61,11 +61,20 @@ export default defineSchema({
   }).index("byStoreyId", ["storeyId"]),
 
   tts: defineTable({
-    threadId: v.string(),
+    storeyId: v.optional(v.id("storey")),
+    threadId: v.optional(v.string()),
     message: v.string(),
     audioStorageId: v.id("_storage"),
     audioUrl: v.optional(v.string()),
-  }).index("byThreadId", ["threadId"]),
+  })
+    .index("byThreadId", ["threadId"])
+    .index("byStoreyId", ["storeyId"]),
+
+  settings: defineTable({
+    storeyId: v.id("storey"),
+    view: v.union(v.literal("orthographic"), v.literal("perspective")),
+    showRawData: v.boolean(),
+  }).index("byStoreyId", ["storeyId"]),
 });
 
 export type Storey = Doc<"storey">;

@@ -3,6 +3,9 @@ import { internalMutation } from "./_generated/server";
 import { Doc, Id } from "./_generated/dataModel"; // Added for type hinting
 import { Segment, normalizeEdge, GAP, EPSILON } from "./walls";
 
+const INTERIOR_DOOR_WIDTH = 0.9;
+const INTERIOR_DOOR_HEIGHT = 2.1;
+
 // Helper function for rounding coordinates (copied from walls.ts as it's not exported)
 function roundToPrecision(value: number, precision: number = 3): number {
   const multiplier = Math.pow(10, precision);
@@ -226,6 +229,15 @@ export const addDoors = internalMutation({
     sharedBoundaries.sort((a, b) => b.length - a.length);
     const chosenBoundary = sharedBoundaries[0];
 
+    if (chosenBoundary.length < INTERIOR_DOOR_WIDTH - EPSILON) {
+      return {
+        error: `Shared boundary (length: ${chosenBoundary.length.toFixed(
+          2
+        )}m) is too short for a ${INTERIOR_DOOR_WIDTH}m wide door.`,
+        message: "Failed to add door.",
+      };
+    }
+
     const midPointOfBoundary: [number, number] = [
       (chosenBoundary.start[0] + chosenBoundary.end[0]) / 2,
       (chosenBoundary.start[1] + chosenBoundary.end[1]) / 2,
@@ -292,16 +304,46 @@ export const addDoors = internalMutation({
       };
     }
 
+    const wallDx = targetWallDoc.end[0] - targetWallDoc.start[0];
+    const wallDy = targetWallDoc.end[1] - targetWallDoc.start[1];
+    const wallLength = Math.sqrt(wallDx * wallDx + wallDy * wallDy);
+
     const vecToMid_x = midPointOfBoundary[0] - targetWallDoc.start[0];
     const vecToMid_y = midPointOfBoundary[1] - targetWallDoc.start[1];
-    const offset = Math.sqrt(vecToMid_x * vecToMid_x + vecToMid_y * vecToMid_y);
+    const offsetToMidpoint = Math.sqrt(
+      vecToMid_x * vecToMid_x + vecToMid_y * vecToMid_y
+    );
+
+    // Check if the door can be centered on the midpoint within the targetWallDoc
+    if (offsetToMidpoint < INTERIOR_DOOR_WIDTH / 2 - EPSILON) {
+      return {
+        error: `Cannot center door: Midpoint of boundary (at ${offsetToMidpoint.toFixed(
+          2
+        )}m from wall start) is too close to the start of the wall segment (length ${wallLength.toFixed(
+          2
+        )}m) for a ${INTERIOR_DOOR_WIDTH}m door.`,
+        message: "Failed to add door.",
+      };
+    }
+    if (offsetToMidpoint + INTERIOR_DOOR_WIDTH / 2 > wallLength + EPSILON) {
+      return {
+        error: `Cannot center door: Midpoint of boundary (at ${offsetToMidpoint.toFixed(
+          2
+        )}m from wall start) is too close to the end of the wall segment (length ${wallLength.toFixed(
+          2
+        )}m) for a ${INTERIOR_DOOR_WIDTH}m door.`,
+        message: "Failed to add door.",
+      };
+    }
+
+    const doorOffsetDB = offsetToMidpoint - INTERIOR_DOOR_WIDTH / 2;
 
     const newDoorId = await ctx.db.insert("doors", {
       storeyId: args.storeyId,
       wallId: targetWallDoc._id,
-      offset: roundToPrecision(offset),
-      width: 0.9, // Standard interior door width
-      height: 2.1, // Standard door height
+      offset: roundToPrecision(doorOffsetDB),
+      width: INTERIOR_DOOR_WIDTH,
+      height: INTERIOR_DOOR_HEIGHT,
       type: "interior",
     });
 
