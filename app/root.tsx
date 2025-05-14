@@ -5,10 +5,13 @@ import {
   Outlet,
   Scripts,
   ScrollRestoration,
+  useLoaderData,
 } from "react-router";
 
 import type { Route } from "./+types/root";
 import "./app.css";
+import { useState } from "react";
+import { ConvexProvider, ConvexReactClient } from "convex/react";
 
 export const links: Route.LinksFunction = () => [
   { rel: "preconnect", href: "https://fonts.googleapis.com" },
@@ -23,7 +26,15 @@ export const links: Route.LinksFunction = () => [
   },
 ];
 
+export async function loader() {
+  const CONVEX_URL = process.env["VITE_CONVEX_URL"]!;
+  return { ENV: { CONVEX_URL } };
+}
+
 export function Layout({ children }: { children: React.ReactNode }) {
+  const { ENV } = useLoaderData<typeof loader>();
+  const [convex] = useState(() => new ConvexReactClient(ENV.CONVEX_URL));
+
   return (
     <html lang="en">
       <head>
@@ -33,7 +44,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
         <Links />
       </head>
       <body>
-        {children}
+        <ConvexProvider client={convex}>{children}</ConvexProvider>
         <ScrollRestoration />
         <Scripts />
       </body>

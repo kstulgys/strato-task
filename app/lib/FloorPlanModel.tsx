@@ -323,7 +323,6 @@ const FloorPlanViewer: React.FC<{ example: (typeof examples)[number] }> = ({
         <Room3D key={`room-${room.id}`} roomData={room} />
       ))}
       {walls.map((wall, index) => (
-        // Using a more robust key, combining index with critical properties
         <Wall3D
           key={`wall-${index}-${wall.xs}-${wall.ys}-${wall.type}`}
           wallData={wall}
@@ -338,7 +337,6 @@ const FloorPlanViewer: React.FC<{ example: (typeof examples)[number] }> = ({
         target={[sceneBounds.centerX, WALL_HEIGHT_MM / 3, sceneBounds.centerZ]}
       />
 
-      {/* GridHelper from drei is a component, not props. Use primitive if not using <GridHelper> component */}
       <gridHelper
         args={[
           Math.max(sceneBounds.sizeX, sceneBounds.sizeZ) + 2000,
